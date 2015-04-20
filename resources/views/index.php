@@ -51,6 +51,7 @@
             var frm = $('#frmMain');
             var crawling = false;
             var stopped = false;
+            var fails = 0;
 
             $('#btnStop').click(function(ev) {
                 ev.preventDefault();
@@ -78,6 +79,7 @@
 
                         crawling = true;
                         stopped = false;
+                        fails = 0;
                         loadSearch(data);
                     }
                 });
@@ -91,6 +93,7 @@
             }
 
             function loadSearch(data) {
+                var search_data = data;
                 if (!crawling || data.status == 0) {
                     if (stopped) {
                         $("#result").append('<li class="list-group-item">Stopped !</li>');
@@ -126,6 +129,17 @@
                         setTimeout(function() {
                             loadSearch(data);
                         }, 500);
+                    },
+                    error: function (xhr, error) {
+                        console.log(error);
+                        fails++;
+                        // Try again if fail
+                        if (fails <= 3) {
+                            $("#result").append('<li class="list-group-item">Failed ! Try again in next 5 seconds</li>');
+                            setTimeout(function() {
+                                loadSearch(search_data);
+                            }, 5000);
+                        }
                     }
                 });
             }
