@@ -3,6 +3,7 @@
 ### Using
 
 Demo : https://twitter-insight-tool-bluemix.herokuapp.com
+Because Heroku limit file size on free instance is 7MB so you will only get about 3000-4000 tweets.
 
 or
 

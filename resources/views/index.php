@@ -92,6 +92,18 @@
                 $("#result").append('<li class="list-group-item">Stopping ... wait to last crawling !</li>');
             }
 
+            function finalizeResult() {
+                $.ajax({
+                    type: 'post',
+                    url: '/api/finalize_result',
+                    success: function (data) {
+                        if (data.status == 1) {
+                            $("#result").append('<li class="list-group-item"><a href="/download/'+ data.file_name + '" target="_blank">Right Click and select Save As !</a></li>');
+                        }
+                    }
+                });
+            }
+
             function loadSearch(data) {
                 var search_data = data;
                 if (!crawling || data.status == 0) {
@@ -99,15 +111,7 @@
                         $("#result").append('<li class="list-group-item">Stopped !</li>');
                     }
 
-                    $.ajax({
-                        type: 'post',
-                        url: '/api/finalize_result',
-                        success: function (data) {
-                            if (data.status == 1) {
-                                $("#result").append('<li class="list-group-item"><a href="/download/'+ data.file_name + '" target="_blank">Right Click and select Save As !</a></li>');
-                            }
-                        }
-                    });
+                    finalizeResult();
 
                     return false;
                 }
@@ -139,6 +143,9 @@
                             setTimeout(function() {
                                 loadSearch(search_data);
                             }, 5000);
+                        } else {
+                            stopSearch();
+                            finalizeResult();
                         }
                     }
                 });
