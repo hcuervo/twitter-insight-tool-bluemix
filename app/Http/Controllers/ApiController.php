@@ -31,8 +31,38 @@ class ApiController extends Controller
         return $result;
     }
 
-    public function download() {
-        return app()->basePath('public');
+    public function upload() {
+        if (!Session::has('api_settings')) {
+            return array('status' => 0);
+        }
+
+        $api_settings = Session::get('api_settings');
+
+        if ($api_settings['finalized'] == 0) {
+            return array('status' => 0);
+        }
+
+        $host = Request::input('host');
+        $userid = Request::input('userid');
+        $password = Request::input('password');
+        $file_name = $api_settings['file_name'];
+        $download_path = app()->basePath('public') . '/download/' . $api_settings['file_name'];
+
+        $url = sprintf("https://%s:8443/data/controller/dfs/tmp/%s?format=json", $host, $file_name);
+
+        $res = RequestClient::post($url)
+                    ->withoutStrictSsl()
+                    ->withoutAutoParsing()
+                    ->authenticateWith($userid, $password)
+                    ->addHeaders(array(
+                        'Content-Type' => 'application/octet-stream',
+                        'Transfer-Encoding' => 'chunked'
+                    ))
+                    ->attach(array($download_path))
+                    ->send();
+
+        $data = json_decode($res->body, true);
+        return (json_last_error() == JSON_ERROR_NONE && $data['status'] == 'SUCCESS') ? array('status' => 1) : array('status' => 0, 'res' => $data);
     }
 
     public function finalizeResult() {

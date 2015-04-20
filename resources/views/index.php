@@ -85,6 +85,29 @@
                 });
             });
 
+            $(document).on('submit', 'form.uploadForm' ,function (ev) {
+                ev.preventDefault();
+
+                var frm = $(this);
+
+                $.ajax({
+                    type: frm.attr('method'),
+                    url: frm.attr('action'),
+                    data: frm.serialize(),
+                    beforeSend: function (xhr, settings) {
+                        $("#result").append('<li class="list-group-item">Uploading ...</li>');
+                    },
+                    success: function (data) {
+                        if ("status" in data && data.status == 1) {
+                            $("#result").append('<li class="list-group-item">Uploaded to `/tmp` folder !</li>');
+                        } else {
+                            $("#result").append('<li class="list-group-item">Upload failed !</li>');
+                            console.log(data);
+                        }
+                    }
+                });
+            });
+
             function stopSearch() {
                 crawling = false;
                 stopped = true;
@@ -101,7 +124,8 @@
                     url: '/api/finalize_result',
                     success: function (data) {
                         if (data.status == 1) {
-                            $("#result").append('<li class="list-group-item"><a href="/download/'+ data.file_name + '" target="_blank">Right Click and select Save As !</a></li>');
+                            $("#result").append('<li class="list-group-item"><a href="/download/'+ data.file_name + '" target="_blank">Right Click and select Save As !</a> or You can upload to HDFS via API with below settings.</li>');
+                            $("#result").append('<li class="list-group-item"><form class="uploadForm form-inline" method="post" action="/api/upload"><input type="text" name="host" placeholder="Host (without port)" class="form-control" /> <input type="text" placeholder="HDFS User ID" name="userid" class="form-control" /> <input type="text" name="password" placeholder="HDFS Password" class="form-control" /> <input type="submit" class="btn btn-primary" value="Upload" /></form></li>');
                         }
                     }
                 });

@@ -15,4 +15,4 @@ $app->get('/', 'App\Http\Controllers\HomeController@index');
 $app->post('/api/init', 'App\Http\Controllers\ApiController@init');
 $app->post('/api/search', 'App\Http\Controllers\ApiController@search');
 $app->post('/api/finalize_result', 'App\Http\Controllers\ApiController@finalizeResult');
-$app->get('/api/download', 'App\Http\Controllers\ApiController@download');
+$app->post('/api/upload', 'App\Http\Controllers\ApiController@upload');
