@@ -93,6 +93,9 @@
             }
 
             function finalizeResult() {
+                crawling = false;
+                stopped = true;
+
                 $.ajax({
                     type: 'post',
                     url: '/api/finalize_result',
