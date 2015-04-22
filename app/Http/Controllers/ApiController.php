@@ -31,6 +31,25 @@ class ApiController extends Controller
         return $result;
     }
 
+    private function uploadToHttpFs($url, $user, $pass, $file_path) {
+        $ch = curl_init($url);
+
+        $headers[] = "Content-Type: application/octet-stream";
+        $headers[] = "Transfer-Encoding: chunked";
+
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_USERPWD, $user . ':' . $pass);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($file_path));
+
+        $postResult = curl_exec($ch);
+        curl_close($ch);
+
+        return $postResult;
+    }
+
     public function upload() {
         if (!Session::has('api_settings')) {
             return array('status' => 0);
@@ -50,6 +69,9 @@ class ApiController extends Controller
 
         $url = sprintf("https://%s:8443/data/controller/dfs/tmp/%s?format=json", $host, $file_name);
 
+        $res = $this->uploadToHttpFs($url, $userid, $password, $download_path);
+
+        /*
         $res = RequestClient::post($url)
                     ->withoutStrictSsl()
                     ->withoutAutoParsing()
@@ -59,10 +81,13 @@ class ApiController extends Controller
                         'Transfer-Encoding' => 'chunked'
                     ))
                     ->attach(array($download_path))
+                    ->contentType('application/octet-stream')
+                    ->neverSerializePayload()
                     ->send();
+        */
 
-        $data = json_decode($res->body, true);
-        return (json_last_error() == JSON_ERROR_NONE && $data['status'] == 'SUCCESS') ? array('status' => 1) : array('status' => 0, 'res' => $data);
+        $data = json_decode($res, true);
+        return (json_last_error() == JSON_ERROR_NONE && $data['status'] == 'SUCCESS') ? array('status' => 1, 'file_name' => $api_settings['file_name']) : array('status' => 0, 'res' => $data);
     }
 
     public function finalizeResult() {

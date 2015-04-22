@@ -99,7 +99,7 @@
                     },
                     success: function (data) {
                         if ("status" in data && data.status == 1) {
-                            $("#result").append('<li class="list-group-item">Uploaded to `/tmp` folder !</li>');
+                            $("#result").append('<li class="list-group-item">Uploaded to `/tmp/' + data.file_name + '` !</li>');
                         } else {
                             $("#result").append('<li class="list-group-item">Upload failed !</li>');
                             console.log(data);
